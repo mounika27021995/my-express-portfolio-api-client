@@ -180,24 +180,37 @@ router.get('/media', function (req, res) {
   });
   });
 
-router.get('/blog', function (req, res, next) {
-  client.get("http://localhost:3030/blog", function (jsonData, response) {
+  router.get('/blog', function (req, res, next) {
+    client.get("http://localhost:3030/blogs", function (jsonData, response) {
         // parsed response body as js object
-        console.log(jsonData.data);
+        //console.log(jsonData);
         // raw response
         // console.log(response);
-        var random = Math.floor(Math.random() * jsonData.data.length);
-        res.render('blog', { 
-            title: 'Blog', 
-            navBlog: true, 
-            showFooter: true, 
-            extraCss: ['/css/blog.css'],
-            categories: jsonData.categories,
-            featuredBlog: jsonData.data[random] ,
-            blog: jsonData.data
-        });  
-      });
+        res.render('admin/blog', { 
+          layout: 'layout-admin', 
+          title: 'Blog Admin',
+          navBlog: true,
+          blogs:   jsonData.data
+        });
+    });
 });
+
+// router.get('/blog', function (req, res, next) {
+//   client.get("http://localhost:3030/blog", function (jsonData, response) {
+//         // parsed response body as js object
+//         console.log(jsonData.data);
+//         // raw response
+//         // console.log(response);
+//         res.render('blog', { 
+//             title: 'Blog', 
+//             navBlog: true, 
+//             showFooter: true, 
+//             extraCss: ['/css/blog.css'],
+//             categories: jsonData.categories,
+//             blog: jsonData.data
+//         });  
+//       });
+// });
 
 /*
 router.get('/blog/:blogAlias', function (req, res, next) {
