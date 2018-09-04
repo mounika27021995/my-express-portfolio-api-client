@@ -11,13 +11,12 @@ router.get('/', function (req, res, next) {
         // console.log(response);
         res.render('blog', { 
             title: 'Blog', 
-            navBlogs: true, 
+            navBlog: true, 
             showFooter: true, 
             extraCss: ['/css/blog.css'],
-            categories:null,
+            categories: null,
             featuredBlog: null,
-             blog: null,
-            blog : jsonData.data
+            blog: jsonData.data
         });
     });
 });
@@ -36,21 +35,21 @@ router.get('/:blogAlias', function (req, res, next) {
                 showFooter: true, 
                 extraCss: ['/css/blog.css'],
                 blog:  blog,
-                categories: data.blogCategories
-              });
+                categories: jsonData.data
+            });
         });
 });
   
-// router.get('/:projectAlias/demo', function (req, res, next) {
-//     function renderDemo(error, project){  
-//         console.log(project);
-//         res.render('demo', { 
-//             layout: 'layout-demo',
-//             title: project.name,
-//             project: project
-//         });
-//     };
-//     projectService.getProjectByAlias(req.params.projectAlias, renderDemo);
-// });
+//  router.get('/:blogAlias/demo', function (req, res, next) {
+//      function renderDemo(error, blog){  
+//          console.log(blog);
+//          res.render('demo', { 
+//              layout: 'layout-demo',
+//              title: blog.name,
+//              blog: blog
+//          });
+//      };
+//      blogService.getBlogByAlias(req.params.blogAlias, renderDemo);
+//  });
 
 module.exports = router;

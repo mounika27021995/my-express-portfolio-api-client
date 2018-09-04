@@ -3,7 +3,6 @@ var md5 = require('js-md5');
 var router = express.Router();
 var Client = require('node-rest-client').Client;
 var client = new Client();
-var apiUrl = "http://localhost:3030/";
 
 // function checkUser(userid, password, callback){
 //   var collection = db.collection('users');
@@ -14,7 +13,7 @@ var apiUrl = "http://localhost:3030/";
 //       callback(null, docs[0]);
 //   });
 // }
-
+console.log("loading Index");
 router.get('/', function (req, res, next) {
   res.render('index', { layout: 'layout-index', navHome: true });
 });
@@ -27,16 +26,27 @@ router.get('/contact', function(req, res, next) {
   res.render('contact', { title: 'Contact', showFooter: true, navContact: true });
 });
 
-router.post('/contact', function(req, res, next) {
+ router.post('/contact', function(req, res, next) {
   // read the values passed from the ui
   var data = req.body;
   console.log(JSON.stringify(data));
-
-  res.render('confirm', { title: 'Contact', showFooter: true, navContact: true, data: data });
+  var args = {
+    data: req.body,
+    headers: { "Content-Type": "application/json" }
+};
+  client.post("http://localhost:3030/contact", args, 
+        function (jsonData, response) {
+            // parsed response body as js object
+            console.log(jsonData);
+            // raw response
+            // console.log(response);
+            res.render('confirm', { title: 'Contact', showFooter: true, navContact: true, data: data });
+        });
+  
 });
 
 router.get('/resume', function(req, res, next) {
-  res.redirect('/siddulamounikaresume.pdf'); 
+  res.redirect('/devika_resume.pdf'); 
 });
 
 router.get('/signin', function(req, res, next) {
@@ -60,34 +70,42 @@ router.post('/signin', function(req, res, next) {
     res.render('admin/signin', {layout:'layout-signin', error: messages.length > 0,messages: messages});
   }else{   
     // authenticate the user details
+   // User.find({'email': email, 'password': password}, function(err, user){
     var args = {
-      data: req.body,
+      data: {'email': email, 'password': password},
       headers: { "Content-Type": "application/json" }
-    };
-
-    console.log(JSON.stringify(args.data));
-
-    client.post(apiUrl + 'signin', args, function (jsonData, response) {
-        // OK case
-        if(jsonData){
-            console.log(JSON.stringify(jsonData));
-            req.session.isAuthenticated = true;
-            req.session.user = jsonData.data[0];
-            res.locals.user = jsonData.data[0];
-
-            res.render('admin/dashboard', { 
-              layout: 'layout-admin', 
-              title: 'Admin Dashboard',
-              navDashboard: true
-            });
-        }else{
-          res.render('admin/signin', { 
-            layout: 'layout-signin', 
-            error: true, 
-            messages:[jsonData.err.msg]
-          });
-        }
+    };   
+    client.get("http://localhost:3030/signin", args, function (jsonData, response) {
+      // parsed response body as js object
+      console.log(jsonData.data); 
+      var user = jsonData.data;
+      if (jsonData.code == 500){
+        res.render('admin/signin', { 
+          layout: 'layout-signin', 
+          error: true, 
+          messages:[err.msg]
+        });
+      }else if (user.length < 1){
+        res.render('admin/signin', { 
+          layout: 'layout-signin', 
+          error: true, 
+          messages:["Invalid userid or passsword"]
+        });
+      }else{
+        // you found a valid user
+        // set the session
+        console.log(JSON.stringify(user));
+        req.session.isAuthenticated = true;
+        req.session.user = user[0];
+        res.locals.user = user[0];
+        res.render('admin/dashboard', { 
+          layout: 'layout-admin', 
+          title: 'Admin Dashboard',
+          navDashboard: true
+        });
+      }
     });
+
   }
 });
 
@@ -102,19 +120,18 @@ router.post('/signup', function(req, res, next) {
   var args = {
     data: req.body,
     headers: { "Content-Type": "application/json" }
-  };
-
-  console.log(JSON.stringify(args.data));
-
-  client.post(apiUrl + 'signup', args, function (jsonData, response) {
-      // OK case
-      if(jsonData){
-          console.log(JSON.stringify(jsonData));
-          res.redirect('/signin');
-      }else{
-        res.render('admin/signup', { layout: 'layout-signin' , hasErrors: true, error: jsonData.data.err});
-      }
-  });
+  };   
+  client.post("http://localhost:3030/signup", args, function (jsonData, response) {
+    // parsed response body as js object
+    //console.log(jsonData.code); 
+    if (jsonData.code == 500){
+      res.redirect('/signup');
+    }
+    else
+    {
+      res.redirect('/signin');
+    }
+  });  
 });
 
 router.get('/signout', function(req, res, next) {
