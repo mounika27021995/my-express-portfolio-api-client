@@ -124,7 +124,7 @@ router.get('/projects/:projectAlias/upload', function (req, res) {
 
 router.post('/projects/:projectAlias/upload', function (req, res, next) {
   var pAlias = req.params.projectAlias;
-  var dir = path.join(__dirname, '../public/images/projects');
+  var dir = path.join(__dirname, '../public/projects/'+ pAlias+ '/images');
   var finishUpload = function (err, data){
     if(err){
       //throw new Error('errro...');
@@ -146,11 +146,6 @@ router.post('/projects/:projectAlias/upload', function (req, res, next) {
     };
     client.put("http://localhost:3030/projects/"+ pAlias, args,
       function (jsonData, response) {
-          // parsed response body as js object
-          //console.log(jsonData);
-          // raw response
-          // console.log(response);
-
           res.redirect('/admin/projects/'+ pAlias);
       });
  
@@ -163,15 +158,17 @@ router.get('/media', function (req, res) {
   res.render('admin/upload', { 
     layout: 'layout-admin', 
     title: 'Image Upload',
-    navProjects: true
+    //navProjects: true
   });
   });
   
+
+
+
   router.post('/media', function (req, res) {
   var dir = path.join(__dirname, '../public/projects/')
   
-  mediaService.upload(req, res, '')
-  req, res, path, alias, callback
+  mediaService.uploadMedia(req, res, path, alias, callback);
   upload(req, res, function (err) {
     if (err) {
       return res.end("Error uploading file.");
@@ -179,6 +176,13 @@ router.get('/media', function (req, res) {
     res.end("File is uploaded");
   });
   });
+
+
+
+
+
+
+
 
   router.get('/blog', function (req, res, next) {
     client.get("http://localhost:3030/blogs", function (jsonData, response) {
